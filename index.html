@@ -16,7 +16,7 @@ body {
 }
 
 .flipbook {
-  width: 614px; /* single-page cover */
+  width: 614px;
   height: 921px;
   perspective: 2000px;
   position: relative;
@@ -24,7 +24,7 @@ body {
 }
 
 .flipbook.expanded {
-  width: 1228px; /* double-page view */
+  width: 1228px;
 }
 
 .spine {
@@ -78,15 +78,15 @@ body {
 <script>
 const flipbook = document.getElementById('flipbook');
 const base = "https://cesarsanchezgraphics-prog.github.io/IFyouknewmyfamily/";
-const totalPages = 41; // number of composition spreads
+const totalSpreads = 41; // number of composition spreads
 const pageElements = [];
 let currentSpread = 0;
 
 // --- FRONT COVER ---
 const cover = document.createElement('div');
 cover.className = 'page cover';
-cover.style.zIndex = totalPages + 3;
-cover.style.transformOrigin = 'right center';
+cover.style.zIndex = totalSpreads + 3;
+cover.style.transformOrigin = 'left center'; // front cover flips from left
 
 const coverImg = document.createElement('img');
 coverImg.src = base + 'OnlineCover.jpg';
@@ -97,7 +97,7 @@ pageElements.push(cover);
 // --- FIRST SPREAD: OnlineCover2 + Page 1 ---
 const firstSpread = document.createElement('div');
 firstSpread.className = 'page spread';
-firstSpread.style.zIndex = totalPages + 2;
+firstSpread.style.zIndex = totalSpreads + 2;
 
 // LEFT: OnlineCover2
 const insideCover = document.createElement('img');
@@ -118,14 +118,18 @@ firstSpread.appendChild(page1);
 flipbook.appendChild(firstSpread);
 pageElements.push(firstSpread);
 
-// --- INNER SPREADS ---
-for(let i=1; i<=totalPages; i++){
+// --- INNER SPREADS: composition.jpg → composition41.jpg ---
+for(let i = 1; i <= totalSpreads; i++){
     const spread = document.createElement('div');
     spread.className = 'page spread';
-    spread.style.zIndex = totalPages - i;
+    spread.style.zIndex = totalSpreads - i;
 
     const img = document.createElement('img');
-    img.src = base + `composition${i}.jpg`;
+    if(i === 1){
+        img.src = base + 'composition.jpg'; // first spread
+    } else {
+        img.src = base + `composition${i}.jpg`; // sequential spreads
+    }
     spread.appendChild(img);
 
     flipbook.appendChild(spread);
@@ -136,7 +140,7 @@ for(let i=1; i<=totalPages; i++){
 const backCover = document.createElement('div');
 backCover.className = 'page cover';
 backCover.style.zIndex = 0;
-backCover.style.transformOrigin = 'left center';
+backCover.style.transformOrigin = 'right center'; // back cover flips from right
 
 const backImg = document.createElement('img');
 backImg.src = base + 'OnlineCover2.jpg';
@@ -159,11 +163,11 @@ flipbook.addEventListener('click', e=>{
         }
 
         if(currentSpread === 0){
-            page.style.transformOrigin = 'right center'; // front cover
+            page.style.transformOrigin = 'left center';
         } else if(currentSpread === pageElements.length - 1){
-            page.style.transformOrigin = 'left center'; // back cover
+            page.style.transformOrigin = 'right center';
         } else {
-            page.style.transformOrigin = 'center center'; // inner spreads
+            page.style.transformOrigin = 'center center';
         }
 
         page.classList.add('flipping');
@@ -178,9 +182,9 @@ flipbook.addEventListener('click', e=>{
         page = pageElements[currentSpread];
 
         if(currentSpread === 0){
-            page.style.transformOrigin = 'right center';
-        } else if(currentSpread === pageElements.length - 1){
             page.style.transformOrigin = 'left center';
+        } else if(currentSpread === pageElements.length - 1){
+            page.style.transformOrigin = 'right center';
         } else {
             page.style.transformOrigin = 'center center';
         }
