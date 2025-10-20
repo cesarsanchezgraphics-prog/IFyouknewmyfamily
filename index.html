@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Flipbook</title>
+<title>Family Flipbook JS</title>
 <style>
   body {
     margin: 0;
@@ -15,20 +15,13 @@
     user-select: none;
   }
 
-  .flipbook-container {
-    perspective: 2000px;
-    width: 100%;
+  .flipbook {
+    width: 90%;
     max-width: 1000px;
     height: 700px;
-    overflow: hidden;
-    background: #f0f0f0;
-  }
-
-  .flipbook {
-    width: 100%;
-    height: 100%;
+    perspective: 2000px;
     position: relative;
-    transform-style: preserve-3d;
+    background: #f0f0f0;
   }
 
   .page {
@@ -37,11 +30,11 @@
     position: absolute;
     top: 0;
     left: 0;
-    transform-origin: left center;
-    transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1), box-shadow 1s;
-    backface-visibility: hidden;
     display: flex;
     justify-content: space-between;
+    transform-origin: left center;
+    backface-visibility: hidden;
+    transition: transform 1s cubic-bezier(0.65,0,0.35,1), box-shadow 1s;
     box-shadow: inset -20px 0 60px rgba(0,0,0,0.15);
     border-radius: 4px;
   }
@@ -68,80 +61,65 @@
 </head>
 <body>
 
-<div class="flipbook-container">
-  <div class="flipbook" id="flipbook"></div>
-</div>
+<div class="flipbook" id="flipbook"></div>
 
 <script>
 const flipbook = document.getElementById('flipbook');
-
-// GitHub Pages base URL
 const base = "https://cesarsanchezgraphics-prog.github.io/IFyouknewmyfamily/";
-
-// 82 single pages → 41 spreads
-const totalPages = 82;
+const totalPages = 82; // 82 single pages = 41 spreads
 const spreads = [];
 
-for (let i = 1; i <= totalPages; i += 2) {
-    const left = String(i).padStart(2, '0');
-    const right = String(i + 1).padStart(2, '0');
-    spreads.push([
-        base + `Portfolio_Page_${left}.jpg`,
-        base + `Portfolio_Page_${right}.jpg`
-    ]);
+// Build spreads dynamically
+for (let i=1; i<=totalPages; i+=2){
+  const left = String(i).padStart(2,'0');
+  const right = String(i+1).padStart(2,'0');
+  spreads.push([base + `Portfolio_Page_${left}.jpg`, base + `Portfolio_Page_${right}.jpg`]);
 }
 
-const pageElements = [];
 let currentSpread = 0;
+const pageElements = [];
 
-// Create spreads
-spreads.forEach((pair, index) => {
-    const div = document.createElement('div');
-    div.className = 'page';
-    div.style.zIndex = spreads.length - index;
+// Create page elements
+spreads.forEach((pair,index)=>{
+  const page = document.createElement('div');
+  page.className = 'page';
+  page.style.zIndex = spreads.length - index;
 
-    pair.forEach(src => {
-        const img = document.createElement('img');
-        img.src = src;
-        div.appendChild(img);
-    });
+  pair.forEach(src=>{
+    const img = document.createElement('img');
+    img.src = src;
+    page.appendChild(img);
+  });
 
-    flipbook.appendChild(div);
-    pageElements.push(div);
+  flipbook.appendChild(page);
+  pageElements.push(page);
 });
 
-// Flip forward/backward with page curl effect
-flipbook.addEventListener('click', (e) => {
-    const rect = flipbook.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    let page;
+// Click to flip pages
+flipbook.addEventListener('click', (e)=>{
+  const rect = flipbook.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  let page;
 
-    if (x > rect.width / 2) {
-        // Right half → forward
-        if (currentSpread < pageElements.length) {
-            page = pageElements[currentSpread];
-            page.classList.add('flipping');
-            setTimeout(() => {
-                page.classList.remove('flipping');
-                page.classList.add('flipped');
-                currentSpread++;
-            }, 200);
-        }
-    } else {
-        // Left half → backward
-        if (currentSpread > 0) {
-            currentSpread--;
-            page = pageElements[currentSpread];
-            page.classList.add('flipping');
-            setTimeout(() => {
-                page.classList.remove('flipping');
-                page.classList.remove('flipped');
-            }, 200);
-        }
-    }
+  if(x > rect.width / 2 && currentSpread < pageElements.length){
+    page = pageElements[currentSpread];
+    page.classList.add('flipping');
+    setTimeout(()=>{
+      page.classList.remove('flipping');
+      page.classList.add('flipped');
+      currentSpread++;
+    },200);
+  } else if(x < rect.width / 2 && currentSpread > 0){
+    currentSpread--;
+    page = pageElements[currentSpread];
+    page.classList.add('flipping');
+    setTimeout(()=>{
+      page.classList.remove('flipping');
+      page.classList.remove('flipped');
+    },200);
+  }
 });
 </script>
 
 </body>
 </html>
-
