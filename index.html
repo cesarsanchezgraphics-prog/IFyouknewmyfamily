@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Flipbook JS</title>
+<title>Royal Flipbook</title>
 <style>
   body {
     margin: 0;
@@ -16,12 +16,24 @@
   }
 
   .flipbook {
-    width: 90%;
-    max-width: 1000px;
-    height: 700px;
-    perspective: 2000px;
     position: relative;
-    background: #f0f0f0;
+    width: 614px;   /* 6.14in scaled to px */
+    height: 921px;  /* 9.21in scaled to px */
+    max-width: 90%;
+    max-height: 90%;
+    perspective: 2000px;
+    background: #fff;
+  }
+
+  .spine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 6px;          /* spine thickness */
+    height: 100%;
+    background: #222;    /* dark spine */
+    transform: translateX(-50%);
+    z-index: 0;
   }
 
   .page {
@@ -37,14 +49,21 @@
     transition: transform 1s cubic-bezier(0.65,0,0.35,1), box-shadow 1s;
     box-shadow: inset -20px 0 60px rgba(0,0,0,0.15);
     border-radius: 4px;
+    background: #fff;
   }
 
   .page img {
-    width: 49.5%;
-    height: 100%;
     object-fit: cover;
-    display: block;
+    height: 100%;
     border-radius: 4px;
+  }
+
+  .page.cover img {
+    width: 100%; /* cover single page */
+  }
+
+  .page.spread img {
+    width: 49.5%; /* spreads are two images */
   }
 
   .page.flipping {
@@ -57,67 +76,84 @@
     z-index: 0;
     box-shadow: inset 20px 0 60px rgba(0,0,0,0.15);
   }
+
+  .page.cover.flipping {
+    transform-origin: right center; /* cover flips from right */
+  }
+
 </style>
 </head>
 <body>
 
-<div class="flipbook" id="flipbook"></div>
+<div class="flipbook" id="flipbook">
+  <div class="spine"></div>
+</div>
 
 <script>
 const flipbook = document.getElementById('flipbook');
 const base = "https://cesarsanchezgraphics-prog.github.io/IFyouknewmyfamily/";
-const totalPages = 82; // 82 single pages = 41 spreads
-const spreads = [];
+const totalPages = 82; // 82 single pages
+const pageElements = [];
+let currentSpread = 0;
 
-// Build spreads dynamically
-for (let i=1; i<=totalPages; i+=2){
-  const left = String(i).padStart(2,'0');
-  const right = String(i+1).padStart(2,'0');
-  spreads.push([base + `Portfolio_Page_${left}.jpg`, base + `Portfolio_Page_${right}.jpg`]);
+// --- COVER PAGE ---
+const cover = document.createElement('div');
+cover.className = 'page cover';
+cover.style.zIndex = totalPages + 1;
+
+const coverImg = document.createElement('img');
+coverImg.src = base + 'Portfolio_Page_01.jpg';
+cover.appendChild(coverImg);
+flipbook.appendChild(cover);
+pageElements.push(cover);
+
+// --- SPREAD PAGES ---
+for(let i=2; i<=totalPages; i+=2){
+    const left = String(i).padStart(2,'0');
+    const right = String(i+1).padStart(2,'0');
+
+    const spread = document.createElement('div');
+    spread.className = 'page spread';
+    spread.style.zIndex = totalPages - i/2 + 1;
+
+    const leftImg = document.createElement('img');
+    leftImg.src = base + `Portfolio_Page_${left}.jpg`;
+    spread.appendChild(leftImg);
+
+    // Handle last page if odd number
+    if(i+1 <= totalPages){
+      const rightImg = document.createElement('img');
+      rightImg.src = base + `Portfolio_Page_${right}.jpg`;
+      spread.appendChild(rightImg);
+    }
+
+    flipbook.appendChild(spread);
+    pageElements.push(spread);
 }
 
-let currentSpread = 0;
-const pageElements = [];
+// --- FLIP LOGIC ---
+flipbook.addEventListener('click', e=>{
+    const rect = flipbook.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    let page;
 
-// Create page elements
-spreads.forEach((pair,index)=>{
-  const page = document.createElement('div');
-  page.className = 'page';
-  page.style.zIndex = spreads.length - index;
-
-  pair.forEach(src=>{
-    const img = document.createElement('img');
-    img.src = src;
-    page.appendChild(img);
-  });
-
-  flipbook.appendChild(page);
-  pageElements.push(page);
-});
-
-// Click to flip pages
-flipbook.addEventListener('click', (e)=>{
-  const rect = flipbook.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  let page;
-
-  if(x > rect.width / 2 && currentSpread < pageElements.length){
-    page = pageElements[currentSpread];
-    page.classList.add('flipping');
-    setTimeout(()=>{
-      page.classList.remove('flipping');
-      page.classList.add('flipped');
-      currentSpread++;
-    },200);
-  } else if(x < rect.width / 2 && currentSpread > 0){
-    currentSpread--;
-    page = pageElements[currentSpread];
-    page.classList.add('flipping');
-    setTimeout(()=>{
-      page.classList.remove('flipping');
-      page.classList.remove('flipped');
-    },200);
-  }
+    if(x > rect.width/2 && currentSpread < pageElements.length){
+        page = pageElements[currentSpread];
+        page.classList.add('flipping');
+        setTimeout(()=>{
+            page.classList.remove('flipping');
+            page.classList.add('flipped');
+            currentSpread++;
+        },200);
+    } else if(x < rect.width/2 && currentSpread > 0){
+        currentSpread--;
+        page = pageElements[currentSpread];
+        page.classList.add('flipping');
+        setTimeout(()=>{
+            page.classList.remove('flipping');
+            page.classList.remove('flipped');
+        },200);
+    }
 });
 </script>
 
