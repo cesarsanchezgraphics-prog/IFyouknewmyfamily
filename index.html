@@ -16,13 +16,16 @@ body {
 }
 
 .flipbook {
-  position: relative;
-  width: 1228px;   /* 6.14 * 2 = 12.28 in */
-  height: 921px;   /* 9.21 in */
-  max-width: 90%;
-  max-height: 90%;
+  width: 614px;   /* initial single-page cover */
+  height: 921px;
+  transition: width 0.5s;
   perspective: 2000px;
+  position: relative;
   background: #fff;
+}
+
+.flipbook.expanded {
+  width: 1228px; /* double-page after cover flip */
 }
 
 .spine {
@@ -37,7 +40,7 @@ body {
 }
 
 .page {
-  width: 50%;
+  width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
@@ -60,12 +63,12 @@ body {
 }
 
 .page.cover img {
-  width: 200%; /* double width for left/right halves */
-  transform: translateX(-50%); /* initially show right half */
+  width: 200%;          /* double width for left/right halves */
+  transform: translateX(-50%); /* initially right half */
 }
 
 .page.spread img {
-  width: 50.5%; /* slightly over 50% to hide spine */
+  width: 50.5%;         /* slightly over 50% to hide spine */
 }
 
 .page.flipping {
@@ -104,19 +107,19 @@ cover.appendChild(coverImg);
 flipbook.appendChild(cover);
 pageElements.push(cover);
 
-// --- FIRST SPREAD: Left half of cover + Page 1 ---
+// --- FIRST SPREAD: LEFT HALF COVER + PAGE 1 ---
 const firstSpread = document.createElement('div');
 firstSpread.className = 'page spread';
 firstSpread.style.zIndex = totalPages + 2;
 
-// Left: back of cover (left half)
+// Left: back of cover
 const coverBack = document.createElement('img');
 coverBack.src = base + 'Final Cover.jpg';
 coverBack.style.width = '200%';
-coverBack.style.transform = 'translateX(0)'; // show left half
+coverBack.style.transform = 'translateX(0)';
 firstSpread.appendChild(coverBack);
 
-// Right: Page 1
+// Right: page 1
 const page1 = document.createElement('img');
 page1.src = base + 'Portfolio_Page_01.jpg';
 firstSpread.appendChild(page1);
@@ -124,29 +127,27 @@ firstSpread.appendChild(page1);
 flipbook.appendChild(firstSpread);
 pageElements.push(firstSpread);
 
-// --- INNER SPREADS: start from Page 2 ---
+// --- INNER SPREADS: page 2 onward ---
 for (let i = 2; i <= totalPages; i += 2) {
-    const leftNum = String(i).padStart(2,'0');
-    const rightNum = String(i+1).padStart(2,'0');
+  const leftNum = String(i).padStart(2,'0');
+  const rightNum = String(i+1).padStart(2,'0');
 
-    const spread = document.createElement('div');
-    spread.className = 'page spread';
-    spread.style.zIndex = totalPages - i/2 + 1;
+  const spread = document.createElement('div');
+  spread.className = 'page spread';
+  spread.style.zIndex = totalPages - i/2 + 1;
 
-    // Left page
-    const leftImg = document.createElement('img');
-    leftImg.src = base + `Portfolio_Page_${leftNum}.jpg`;
-    spread.appendChild(leftImg);
+  const leftImg = document.createElement('img');
+  leftImg.src = base + `Portfolio_Page_${leftNum}.jpg`;
+  spread.appendChild(leftImg);
 
-    // Right page
-    if(i+1 <= totalPages){
-      const rightImg = document.createElement('img');
-      rightImg.src = base + `Portfolio_Page_${rightNum}.jpg`;
-      spread.appendChild(rightImg);
-    }
+  if (i+1 <= totalPages){
+    const rightImg = document.createElement('img');
+    rightImg.src = base + `Portfolio_Page_${rightNum}.jpg`;
+    spread.appendChild(rightImg);
+  }
 
-    flipbook.appendChild(spread);
-    pageElements.push(spread);
+  flipbook.appendChild(spread);
+  pageElements.push(spread);
 }
 
 // --- BACK COVER ---
@@ -171,12 +172,16 @@ flipbook.addEventListener('click', e => {
   if(x > rect.width/2 && currentSpread < pageElements.length){
       page = pageElements[currentSpread];
 
-      // Set transform-origin
-      if(currentSpread === 0){ // cover flips
+      // FIRST FLIP: expand container and show left half of cover
+      if(currentSpread === 0){
+          flipbook.classList.add('expanded');
+          coverImg.style.transform = 'translateX(0)'; // show left half
+      }
+
+      // set transform-origin
+      if(currentSpread === 0 || currentSpread === 1){ 
           page.style.transformOrigin = 'left center';
-      } else if(currentSpread === 1){ // first spread
-          page.style.transformOrigin = 'left center';
-      } else if((currentSpread-1) % 2 === 1){
+      } else if ((currentSpread-1) % 2 === 1){
           page.style.transformOrigin = 'right center';
       } else {
           page.style.transformOrigin = 'left center';
@@ -193,11 +198,9 @@ flipbook.addEventListener('click', e => {
       currentSpread--;
       page = pageElements[currentSpread];
 
-      if(currentSpread === 0){
+      if(currentSpread === 0 || currentSpread === 1){
           page.style.transformOrigin = 'left center';
-      } else if(currentSpread === 1){
-          page.style.transformOrigin = 'left center';
-      } else if((currentSpread-1) % 2 === 1){
+      } else if ((currentSpread-1) % 2 === 1){
           page.style.transformOrigin = 'right center';
       } else {
           page.style.transformOrigin = 'left center';
