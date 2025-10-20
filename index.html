@@ -5,78 +5,79 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>If You Knew My Family</title>
 <style>
-  body {
-    margin: 0;
-    background: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    user-select: none;
-  }
+body {
+  margin: 0;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+}
 
-  .flipbook {
-    position: relative;
-    width: 614px;   /* 6.14 in */
-    height: 921px;  /* 9.21 in */
-    max-width: 90%;
-    max-height: 90%;
-    perspective: 2000px;
-    background: #fff;
-  }
+.flipbook {
+  position: relative;
+  width: 1228px;   /* 6.14 * 2 = 12.28 in */
+  height: 921px;   /* 9.21 in */
+  max-width: 90%;
+  max-height: 90%;
+  perspective: 2000px;
+  background: #fff;
+}
 
-  .spine {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    width: 6px;
-    height: 100%;
-    background: #222;
-    transform: translateX(-50%);
-    z-index: 0;
-  }
+.spine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  background: #222;
+  transform: translateX(-50%);
+  z-index: 0;
+}
 
-  .page {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    justify-content: space-between;
-    transform-origin: left center;
-    backface-visibility: hidden;
-    transition: transform 1s cubic-bezier(0.65,0,0.35,1), box-shadow 1s;
-    box-shadow: inset -20px 0 60px rgba(0,0,0,0.15);
-    border-radius: 4px;
-    background: #fff;
-  }
+.page {
+  width: 50%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  transition: transform 1s cubic-bezier(0.65,0,0.35,1), box-shadow 1s;
+  box-shadow: inset -20px 0 60px rgba(0,0,0,0.15);
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
 
-  .page img {
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-  }
+.page img {
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
 
-  .page.cover img {
-    width: 200%;          /* show right half initially */
-    transform: translateX(-50%);
-  }
+.page.cover img {
+  width: 200%; /* double width for left/right halves */
+  transform: translateX(-50%); /* initially show right half */
+}
 
-  .page.spread img {
-    width: 50.5%;         /* slightly over 50% to hide spine gap */
-  }
+.page.spread img {
+  width: 50.5%; /* slightly over 50% to hide spine */
+}
 
-  .page.flipping {
-    transform: rotateY(-20deg);
-    box-shadow: inset -40px 0 80px rgba(0,0,0,0.3);
-  }
+.page.flipping {
+  transform: rotateY(-20deg);
+  box-shadow: inset -40px 0 80px rgba(0,0,0,0.3);
+}
 
-  .page.flipped {
-    transform: rotateY(-180deg);
-    z-index: 0;
-    box-shadow: inset 20px 0 60px rgba(0,0,0,0.15);
-  }
+.page.flipped {
+  transform: rotateY(-180deg);
+  z-index: 0;
+  box-shadow: inset 20px 0 60px rgba(0,0,0,0.15);
+}
 </style>
 </head>
 <body>
@@ -95,15 +96,35 @@ let currentSpread = 0;
 // --- FRONT COVER ---
 const cover = document.createElement('div');
 cover.className = 'page cover';
-cover.style.zIndex = totalPages + 2;
+cover.style.zIndex = totalPages + 3;
 
 const coverImg = document.createElement('img');
-coverImg.src = base + 'Final Cover.jpg';  // your cover image
+coverImg.src = base + 'Final Cover.jpg';
 cover.appendChild(coverImg);
 flipbook.appendChild(cover);
 pageElements.push(cover);
 
-// --- INNER SPREADS ---
+// --- FIRST SPREAD: Left half of cover + Page 1 ---
+const firstSpread = document.createElement('div');
+firstSpread.className = 'page spread';
+firstSpread.style.zIndex = totalPages + 2;
+
+// Left: back of cover (left half)
+const coverBack = document.createElement('img');
+coverBack.src = base + 'Final Cover.jpg';
+coverBack.style.width = '200%';
+coverBack.style.transform = 'translateX(0)'; // show left half
+firstSpread.appendChild(coverBack);
+
+// Right: Page 1
+const page1 = document.createElement('img');
+page1.src = base + 'Portfolio_Page_01.jpg';
+firstSpread.appendChild(page1);
+
+flipbook.appendChild(firstSpread);
+pageElements.push(firstSpread);
+
+// --- INNER SPREADS: start from Page 2 ---
 for (let i = 2; i <= totalPages; i += 2) {
     const leftNum = String(i).padStart(2,'0');
     const rightNum = String(i+1).padStart(2,'0');
@@ -112,16 +133,16 @@ for (let i = 2; i <= totalPages; i += 2) {
     spread.className = 'page spread';
     spread.style.zIndex = totalPages - i/2 + 1;
 
-    // LEFT PAGE
+    // Left page
     const leftImg = document.createElement('img');
     leftImg.src = base + `Portfolio_Page_${leftNum}.jpg`;
     spread.appendChild(leftImg);
 
-    // RIGHT PAGE (if exists)
-    if (i+1 <= totalPages){
-        const rightImg = document.createElement('img');
-        rightImg.src = base + `Portfolio_Page_${rightNum}.jpg`;
-        spread.appendChild(rightImg);
+    // Right page
+    if(i+1 <= totalPages){
+      const rightImg = document.createElement('img');
+      rightImg.src = base + `Portfolio_Page_${rightNum}.jpg`;
+      spread.appendChild(rightImg);
     }
 
     flipbook.appendChild(spread);
@@ -132,56 +153,62 @@ for (let i = 2; i <= totalPages; i += 2) {
 const backCover = document.createElement('div');
 backCover.className = 'page cover';
 backCover.style.zIndex = 0;
+
 const backImg = document.createElement('img');
-backImg.src = base + 'Final Cover.jpg'; // same image, left half for back cover
+backImg.src = base + 'Final Cover.jpg';
 backImg.style.transform = 'translateX(0)'; // left half
 backCover.appendChild(backImg);
+
 flipbook.appendChild(backCover);
 pageElements.push(backCover);
 
 // --- FLIP LOGIC ---
 flipbook.addEventListener('click', e => {
-    const rect = flipbook.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    let page;
+  const rect = flipbook.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  let page;
 
-    if(x > rect.width/2 && currentSpread < pageElements.length){
-        page = pageElements[currentSpread];
+  if(x > rect.width/2 && currentSpread < pageElements.length){
+      page = pageElements[currentSpread];
 
-        // Set transform-origin for realistic flip
-        if(currentSpread === 0){ // cover
-            page.style.transformOrigin = 'left center';
-        } else if (currentSpread % 2 === 1){ // right-hand page
-            page.style.transformOrigin = 'right center';
-        } else { // left-hand page
-            page.style.transformOrigin = 'left center';
-        }
+      // Set transform-origin
+      if(currentSpread === 0){ // cover flips
+          page.style.transformOrigin = 'left center';
+      } else if(currentSpread === 1){ // first spread
+          page.style.transformOrigin = 'left center';
+      } else if((currentSpread-1) % 2 === 1){
+          page.style.transformOrigin = 'right center';
+      } else {
+          page.style.transformOrigin = 'left center';
+      }
 
-        page.classList.add('flipping');
-        setTimeout(()=>{
-            page.classList.remove('flipping');
-            page.classList.add('flipped');
-            currentSpread++;
-        },200);
-    } else if(x < rect.width/2 && currentSpread > 0){
-        currentSpread--;
-        page = pageElements[currentSpread];
+      page.classList.add('flipping');
+      setTimeout(()=>{
+          page.classList.remove('flipping');
+          page.classList.add('flipped');
+          currentSpread++;
+      },200);
 
-        // Set transform-origin for backward flip
-        if(currentSpread === 0){
-            page.style.transformOrigin = 'left center';
-        } else if (currentSpread % 2 === 1){
-            page.style.transformOrigin = 'right center';
-        } else {
-            page.style.transformOrigin = 'left center';
-        }
+  } else if(x < rect.width/2 && currentSpread > 0){
+      currentSpread--;
+      page = pageElements[currentSpread];
 
-        page.classList.add('flipping');
-        setTimeout(()=>{
-            page.classList.remove('flipping');
-            page.classList.remove('flipped');
-        },200);
-    }
+      if(currentSpread === 0){
+          page.style.transformOrigin = 'left center';
+      } else if(currentSpread === 1){
+          page.style.transformOrigin = 'left center';
+      } else if((currentSpread-1) % 2 === 1){
+          page.style.transformOrigin = 'right center';
+      } else {
+          page.style.transformOrigin = 'left center';
+      }
+
+      page.classList.add('flipping');
+      setTimeout(()=>{
+          page.classList.remove('flipping');
+          page.classList.remove('flipped');
+      },200);
+  }
 });
 </script>
 
