@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1">&lt;title&gt;Family Flipbook&lt;/title&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background: #f0f0f0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: 100vh;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.flipbook-container {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>perspective: 2000px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>max-width: 1000px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: 700px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background: #f0f0f0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.flipbook {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>transform-style: preserve-3d;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.page {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>transform-origin: left center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1), box-shadow 1s;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>backface-visibility: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>justify-content: space-between;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>box-shadow: inset -20px 0 60px rgba(0,0,0,0.15);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.page img {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 49.5%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>object-fit: cover;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.page.flipping {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>transform: rotateY(-20deg);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>box-shadow: inset -40px 0 80px rgba(0,0,0,0.3);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.page.flipped {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>transform: rotateY(-180deg);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>z-index: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>box-shadow: inset 20px 0 60px rgba(0,0,0,0.15);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="flipbook-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="flipbook" id="flipbook"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">const flipbook = document.getElementById('flipbook');</p>
+<p class="p2"><br></p>
+<p class="p1">// 82 single pages → 41 spreads</p>
+<p class="p1">const totalPages = 82;</p>
+<p class="p1">const spreads = [];</p>
+<p class="p2"><br></p>
+<p class="p1">for (let i = 1; i &lt;= totalPages; i += 2) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const left = String(i).padStart(2, '0');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const right = String(i + 1).padStart(2, '0');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>spreads.push([`Portfolio_Page_${left}.jpg`, `Portfolio_Page_${right}.jpg`]);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">const pageElements = [];</p>
+<p class="p1">let currentSpread = 0;</p>
+<p class="p2"><br></p>
+<p class="p1">// Create spreads</p>
+<p class="p1">spreads.forEach((pair, index) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const div = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>div.className = 'page';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>div.style.zIndex = spreads.length - index;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>pair.forEach(src =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const img = document.createElement('img');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>img.src = src;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>div.appendChild(img);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>flipbook.appendChild(div);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>pageElements.push(div);</p>
+<p class="p1">});</p>
+<p class="p2"><br></p>
+<p class="p1">// Flip forward/backward with page curl effect</p>
+<p class="p1">flipbook.addEventListener('click', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const rect = flipbook.getBoundingClientRect();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const x = e.clientX - rect.left;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let page;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (x &gt; rect.width / 2) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Right half → forward</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (currentSpread &lt; pageElements.length) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>page = pageElements[currentSpread];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>page.classList.add('flipping');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>page.classList.remove('flipping');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>page.classList.add('flipped');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>currentSpread++;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}, 200); // short delay for curl effect</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Left half → backward</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (currentSpread &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>currentSpread--;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>page = pageElements[currentSpread];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>page.classList.add('flipping');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>page.classList.remove('flipping');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>page.classList.remove('flipped');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}, 200);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">});</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
