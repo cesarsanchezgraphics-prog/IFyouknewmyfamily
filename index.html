@@ -125,11 +125,7 @@ for(let i = 1; i <= totalSpreads; i++){
     spread.style.zIndex = totalSpreads - i;
 
     const img = document.createElement('img');
-    if(i === 1){
-        img.src = base + 'composition.jpg'; // first spread
-    } else {
-        img.src = base + `composition${i}.jpg`; // sequential spreads
-    }
+    img.src = i === 1 ? base + 'composition.jpg' : base + `composition${i}.jpg`;
     spread.appendChild(img);
 
     flipbook.appendChild(spread);
@@ -162,12 +158,13 @@ flipbook.addEventListener('click', e=>{
             flipbook.classList.add('expanded');
         }
 
+        // set flip origin
         if(currentSpread === 0){
-            page.style.transformOrigin = 'left center';
+            page.style.transformOrigin = 'left center'; // front cover
         } else if(currentSpread === pageElements.length - 1){
-            page.style.transformOrigin = 'right center';
+            page.style.transformOrigin = 'right center'; // back cover
         } else {
-            page.style.transformOrigin = 'center center';
+            page.style.transformOrigin = 'center center'; // inner spreads
         }
 
         page.classList.add('flipping');
