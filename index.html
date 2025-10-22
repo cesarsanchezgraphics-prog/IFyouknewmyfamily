@@ -11,32 +11,37 @@
   --spread-w: 1178px; /* double page width */
 }
 
-/* Page background */
-body {
+/* Centering and background */
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
   background: #ccc;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  justify-content: center; /* horizontal center */
+  align-items: center;     /* vertical center */
   user-select: none;
-}
-
-/* Responsive container for Readymag */
-#flipbook-container {
-  width: 100%;
-  max-width: var(--spread-w);
-  aspect-ratio: var(--spread-w) / var(--page-h);
   overflow: hidden;
 }
 
-/* Book wrapper keeps internal pixel-perfect sizing */
+/* Responsive container */
+#flipbook-container {
+  width: 100%;
+  max-width: 1024px;        /* max page width */
+  aspect-ratio: var(--spread-w)/var(--page-h);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Book wrapper keeps internal sizing */
 .book-wrap {
   width: var(--spread-w);
   height: var(--page-h);
   transform-origin: top left;
-  transition: transform 0.3s ease;
   position: relative;
+  transition: transform 0.3s ease;
 }
 
 /* Flipbook container */
@@ -115,8 +120,8 @@ body {
   display: flex;
 }
 
-/* Responsive scaling inside Readymag iframe */
-@media(max-width: 1200px) {
+/* Optional scaling for smaller screens */
+@media(max-width:1024px) {
   .book-wrap {
     transform: scale(calc(100% / var(--spread-w)));
   }
