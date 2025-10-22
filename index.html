@@ -1,203 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online Flipbook</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Custom Flipbook</title>
 <style>
-body {
-  margin: 0;
-  background: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  user-select: none;
-}
+  :root{
+    --book-w:1228px;
+    --book-h:921px;
+    --bg:#e6e6e6;
+  }
+  html,body{height:100%;margin:0;}
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
 
-.flipbook {
-  width: 614px;
-  height: 921px;
-  perspective: 2000px;
-  position: relative;
-  transition: width 0.5s;
-}
+  /* wrapper that keeps book centered and scales responsively */
+  .book-wrap{
+    width:var(--book-w);
+    height:var(--book-h);
+    transform-origin: top left;
+    position: relative;
+  }
 
-.flipbook.expanded {
-  width: 1228px;
-}
+  .flipbook {
+    width:100%;
+    height:100%;
+    position:relative;
+    perspective: 2000px;
+  }
 
-.spine {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 6px;
-  height: 100%;
-  background: #222;
-  transform: translateX(-50%);
-  z-index: 10;
-}
+  /* visual spine (center line) */
+  .spine {
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+    width:6px;
+    height:100%;
+    background:#222;
+    z-index:1000;
+    pointer-events:none;
+    border-radius:2px;
+  }
 
-.page {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  transition: transform 1s cubic-bezier(0.65,0,0.35,1), box-shadow 1s;
-  box-shadow: inset -20px 0 60px rgba(0,0,0,0.15);
-  border-radius: 4px;
-  overflow: hidden;
-}
+  /* generic page */
+  .page {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    transform-style:preserve-3d;
+    backface-visibility:hidden;
+    overflow:hidden;
+    border-radius:6px;
+    transition: transform 900ms cubic-bezier(.2,.9,.2,1), box-shadow 900ms;
+    box-shadow: inset -20px 0 60px rgba(0,0,0,0.12);
+  }
 
-.page img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+  .page img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    user-drag: none;
+    user-select: none;
+    pointer-events: none;
+  }
 
-.page.flipping {
-  box-shadow: inset -40px 0 80px rgba(0,0,0,0.3);
-}
+  /* flipping state */
+  .page.flipping{ box-shadow: inset -50px 0 120px rgba(0,0,0,0.35); }
+  .page.flipped {
+    transform: rotateY(-180deg);
+    z-index:10;
+    box-shadow: inset 20px 0 60px rgba(0,0,0,0.10);
+  }
 
-.page.flipped {
-  transform: rotateY(-180deg);
-  z-index: 0;
-  box-shadow: inset 20px 0 60px rgba(0,0,0,0.15);
-}
+  /* keep topmost pages on top */
+  .page[data-index="0"]{ z-index:2000; }
+  .page[data-index="1"]{ z-index:1990; }
+
+  /* little responsive hint: do not exceed viewport */
+  @media (max-width: 640px){
+    .book-wrap{ transform-origin: top center; }
+  }
 </style>
 </head>
 <body>
 
-<div class="flipbook" id="flipbook">
-  <div class="spine"></div>
+<div id="bookContainer" class="book-wrap">
+  <div class="flipbook" id="flipbook">
+    <div class="spine"></div>
+  </div>
 </div>
 
 <script>
+/* ================= CONFIG ================= */
+const BASE = "https://cesarsanchezgraphics-prog.github.io/IFyouknewmyfamily/"; // your base
+const TOTAL_SPREADS = 41;   // Composition1..41
+const BOOK_W = 1228;
+const BOOK_H = 921;
+
+/* Change this if you want the cover to flip from 'left' instead of 'right' */
+const COVER_FLIP_ORIGIN = 'right'; // 'right' or 'left'
+/* ========================================== */
+
 const flipbook = document.getElementById('flipbook');
-const base = "https://cesarsanchezgraphics-prog.github.io/IFyouknewmyfamily/";
-const totalSpreads = 41; // number of inner spreads
-const pageElements = [];
-let currentSpread = 0;
+const bookWrap = document.getElementById('bookContainer');
+const pages = [];
+let current = 0; // how many pages have been flipped (0 = cover still closed)
 
-// --- FRONT COVER ---
-const cover = document.createElement('div');
-cover.className = 'page cover';
-cover.style.zIndex = totalSpreads + 3;
-cover.style.transformOrigin = 'left center';
-
-const coverImg = document.createElement('img');
-coverImg.src = base + 'OnlineCover.jpg';
-cover.appendChild(coverImg);
-flipbook.appendChild(cover);
-pageElements.push(cover);
-console.log("Loading front cover:", coverImg.src);
-
-// --- FIRST SPREAD: OnlineCover2 + Page 1 ---
-const firstSpread = document.createElement('div');
-firstSpread.className = 'page spread';
-firstSpread.style.zIndex = totalSpreads + 2;
-
-// LEFT: OnlineCover2
-const insideCover = document.createElement('img');
-insideCover.src = base + 'OnlineCover2.jpg';
-insideCover.style.width = '50%';
-insideCover.style.position = 'absolute';
-insideCover.style.left = '0';
-firstSpread.appendChild(insideCover);
-console.log("Loading inside cover (left):", insideCover.src);
-
-// RIGHT: Page 1
-const page1 = document.createElement('img');
-page1.src = base + 'Portfolio_Page_01.jpg';
-page1.style.width = '50%';
-page1.style.position = 'absolute';
-page1.style.right = '0';
-firstSpread.appendChild(page1);
-console.log("Loading page 1 (right):", page1.src);
-
-flipbook.appendChild(firstSpread);
-pageElements.push(firstSpread);
-
-// --- INNER SPREADS: Composition.jpg → Composition41.jpg ---
-for(let i = 1; i <= totalSpreads; i++){
-    const spread = document.createElement('div');
-    spread.className = 'page spread';
-    spread.style.zIndex = totalSpreads - i;
-
-    const img = document.createElement('img');
-    const filename = i === 1 ? 'Composition.jpg' : `Composition${i}.jpg`;
-    img.src = base + filename;
-    console.log("Loading inner spread:", img.src);
-    spread.appendChild(img);
-
-    flipbook.appendChild(spread);
-    pageElements.push(spread);
+/* helper: create page element */
+function makePage(imgSrc, idx, isCover=false){
+  const el = document.createElement('div');
+  el.className = 'page';
+  el.dataset.index = idx;
+  const img = document.createElement('img');
+  img.draggable = false;
+  img.src = imgSrc;
+  img.alt = "page " + idx;
+  // add a graceful onerror so we try alternate filename variants
+  img.addEventListener('error', ()=> handleImgError(img, imgSrc));
+  el.appendChild(img);
+  return el;
 }
 
-// --- BACK COVER ---
-const backCover = document.createElement('div');
-backCover.className = 'page cover';
-backCover.style.zIndex = 0;
-backCover.style.transformOrigin = 'right center';
-
-const backImg = document.createElement('img');
-backImg.src = base + 'OnlineCover2.jpg';
-backCover.appendChild(backImg);
-flipbook.appendChild(backCover);
-pageElements.push(backCover);
-console.log("Loading back cover:", backImg.src);
-
-// --- FLIP LOGIC ---
-flipbook.addEventListener('click', e=>{
-    const rect = flipbook.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    let page;
-
-    if(x > rect.width/2 && currentSpread < pageElements.length){
-        page = pageElements[currentSpread];
-
-        if(currentSpread === 0){
-            flipbook.classList.add('expanded');
-        }
-
-        if(currentSpread === 0){
-            page.style.transformOrigin = 'left center';
-        } else if(currentSpread === pageElements.length - 1){
-            page.style.transformOrigin = 'right center';
-        } else {
-            page.style.transformOrigin = 'center center';
-        }
-
-        page.classList.add('flipping');
-        setTimeout(()=>{
-            page.classList.remove('flipping');
-            page.classList.add('flipped');
-            currentSpread++;
-        },300);
-
-    } else if(x < rect.width/2 && currentSpread > 0){
-        currentSpread--;
-        page = pageElements[currentSpread];
-
-        if(currentSpread === 0){
-            page.style.transformOrigin = 'left center';
-        } else if(currentSpread === pageElements.length - 1){
-            page.style.transformOrigin = 'right center';
-        } else {
-            page.style.transformOrigin = 'center center';
-        }
-
-        page.classList.add('flipping');
-        setTimeout(()=>{
-            page.classList.remove('flipping');
-            page.classList.remove('flipped');
-        },300);
+/* attempt alternate filename casing and subfolder if 404 */
+function handleImgError(imgEl, triedSrc){
+  console.warn('Failed to load:', triedSrc);
+  const url = new URL(triedSrc, location.href);
+  const name = url.pathname.split('/').pop();
+  // try capitalized first letter variant if not already
+  const tryVariants = [];
+  if(/[a-z]/.test(name[0])){
+    tryVariants.push(name.charAt(0).toUpperCase() + name.slice(1));
+  } else {
+    tryVariants.push(name.charAt(0).toLowerCase() + name.slice(1));
+  }
+  // try with an "images/" subfolder (common)
+  tryVariants.push('images/' + name);
+  // try all variants
+  (async ()=>{
+    for(const v of tryVariants){
+      const newUrl = BASE + v;
+      try{
+        // quick existence check by preloading
+        await preloadImage(newUrl);
+        console.log('Recovered image via:', newUrl);
+        imgEl.src = newUrl;
+        return;
+      }catch(e){
+        console.warn('Still failed:', newUrl);
+      }
     }
+    console.error('All attempts failed for', triedSrc, '. Open browser console to see attempts.');
+  })();
+}
+
+function preloadImage(src){
+  return new Promise((res, rej)=>{
+    const i = new Image();
+    i.onload = ()=>res(src);
+    i.onerror = ()=>rej(src);
+    i.src = src;
+  });
+}
+
+/* Build structure
+   Order:
+   0: front cover (OnlineCover)
+   1: first spread (OnlineCover2 on left + Portfolio_Page_01 on right) — implemented as a full-width "spread" element with two absolutely positioned halves
+   2..(2+TOTAL_SPREADS-1): Composition1..CompositionN
+   last: back cover (OnlineCover2)
+*/
+(async function build(){
+  // FRONT COVER
+  const coverSrcCandidates = [
+    BASE + 'OnlineCover.jpg',
+    BASE + 'onlinecover.jpg'
+  ];
+  const coverSrc = await pickFirstWorking(coverSrcCandidates);
+  const coverPage = makePage(coverSrc || coverSrcCandidates[0], 0, true);
+  coverPage.style.transformOrigin = (COVER_FLIP_ORIGIN==='left' ? 'left center' : 'right center');
+  flipbook.appendChild(coverPage);
+  pages.push(coverPage);
+
+  // FIRST SPREAD (left = OnlineCover2, right = Portfolio_Page_01)
+  const first = document.createElement('div');
+  first.className = 'page';
+  first.dataset.index = 1;
+  // left img element
+  const leftImg = document.createElement('img');
+  leftImg.draggable = false;
+  leftImg.style.position = 'absolute';
+  leftImg.style.left = '0';
+  leftImg.style.top = '0';
+  leftImg.style.width = '50%';
+  leftImg.style.height = '100%';
+  leftImg.style.objectFit = 'cover';
+  leftImg.src = BASE + 'OnlineCover2.jpg';
+  leftImg.addEventListener('error', ()=> handleImgError(leftImg, leftImg.src));
+  first.appendChild(leftImg);
+  // right img element
+  const rightImg = document.createElement('img');
+  rightImg.draggable = false;
+  rightImg.style.position = 'absolute';
+  rightImg.style.right = '0';
+  rightImg.style.top = '0';
+  rightImg.style.width = '50%';
+  rightImg.style.height = '100%';
+  rightImg.style.objectFit = 'cover';
+  rightImg.src = BASE + 'Portfolio_Page_01.jpg';
+  rightImg.addEventListener('error', ()=> handleImgError(rightImg, rightImg.src));
+  first.appendChild(rightImg);
+
+  flipbook.appendChild(first);
+  pages.push(first);
+
+  // INNER SPREADS: Composition.jpg, Composition2.jpg ... Composition41.jpg (robust)
+  for(let i=1;i<=TOTAL_SPREADS;i++){
+    const pageIndex = pages.length;
+    const filename = (i===1) ? 'Composition.jpg' : `Composition${i}.jpg`;
+    const srcCandidates = [
+      BASE + filename,
+      BASE + filename.toLowerCase(),          // try lowercase variant
+      BASE + `composition${i}.jpg`,           // alternative lowercase patterns
+      BASE + `composition${i}.JPG`,
+      BASE + `images/${filename}`,
+      BASE + `images/${filename.toLowerCase()}`
+    ];
+    const chosen = await pickFirstWorking(srcCandidates);
+    const srcToUse = chosen || srcCandidates[0];
+    const sp = makePage(srcToUse, pageIndex);
+    // inner spreads should rotate about center (spine)
+    sp.style.transformOrigin = 'center center';
+    flipbook.appendChild(sp);
+    pages.push(sp);
+  }
+
+  // BACK COVER (both inside & outside = OnlineCover2.jpg as requested)
+  const backCandidates = [
+    BASE + 'OnlineCover2.jpg',
+    BASE + 'onlinecover2.jpg'
+  ];
+  const backSrc = await pickFirstWorking(backCandidates);
+  const back = makePage(backSrc || backCandidates[0], pages.length, true);
+  back.style.transformOrigin = (COVER_FLIP_ORIGIN==='left' ? 'right center' : 'left center'); // opposite of front
+  flipbook.appendChild(back);
+  pages.push(back);
+
+  // set initial stacking order (topmost cover should sit above others)
+  pages.forEach((p, idx)=>{
+    p.style.zIndex = (1000 - idx);
+  });
+
+  // initial scale to fit viewport while keeping actual size intact
+  fitToViewport();
+  window.addEventListener('resize', fitToViewport);
+
+  // attach click handlers for flipping
+  flipbook.addEventListener('click', onClickFlip);
+
+  console.log('Flipbook built. Pages total:', pages.length);
+})();
+
+/* pick first working URL from array (tries to preload images) */
+async function pickFirstWorking(list){
+  for(const u of list){
+    try{ await preloadImage(u); return u; }catch(e){ /* try next */ }
+  }
+  return null;
+}
+
+/* flipping behavior: click right half -> forward, left half -> back */
+function onClickFlip(ev){
+  const rect = flipbook.getBoundingClientRect();
+  const x = ev.clientX - rect.left;
+  const half = rect.width / 2;
+
+  if(x > half){
+    // forward
+    if(current < pages.length){
+      const p = pages[current];
+      // set transform origin for this flip (already set for cover/back/inner)
+      // ensure when flipping first inner spreads after expanding the book, transform origin is center
+      p.classList.add('flipping');
+      // small delay for the flipping visual
+      setTimeout(()=>{ p.classList.remove('flipping'); p.classList.add('flipped'); current++; }, 50);
+    }
+  } else {
+    // backward
+    if(current > 0){
+      // when going back, the page we need to unflip is pages[current-1]
+      const p = pages[current-1];
+      p.classList.add('flipping');
+      setTimeout(()=>{ p.classList.remove('flipping'); p.classList.remove('flipped'); current--; }, 50);
+    }
+  }
+}
+
+/* Make book actual-size but scale down responsively */
+function fitToViewport(){
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scale = Math.min(1, Math.min(vw / BOOK_W, vh / BOOK_H));
+  bookWrap.style.transform = `scale(${scale})`;
+  // keep centered by translating a bit when scaled (the body flex centering handles most)
+}
+
+/* Optional: keyboard navigation */
+window.addEventListener('keydown', (e)=>{
+  if(e.key === 'ArrowRight') {
+    // simulate click on right half
+    const rect = flipbook.getBoundingClientRect();
+    onClickFlip({clientX: rect.left + rect.width * 0.75});
+  } else if(e.key === 'ArrowLeft'){
+    const rect = flipbook.getBoundingClientRect();
+    onClickFlip({clientX: rect.left + rect.width * 0.25});
+  }
 });
 </script>
-
 </body>
 </html>
