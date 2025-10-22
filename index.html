@@ -1,69 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Composition Flipbook</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsive Flipbook</title>
 <style>
 :root {
-  --page-w: 589px;    /* 6.14in @ 96dpi */
-  --page-h: 885px;    /* 9.21in @ 96dpi */
-  --spread-w: calc(var(--page-w) * 2); /* 1178px */
+  --page-w: 589px;    /* 6.14in */
+  --page-h: 885px;    /* 9.21in */
+  --spread-w: 1178px; /* double page width */
 }
 
-/* basic layout */
-html, body {
+/* Page background */
+body {
   margin: 0;
-  height: 100%;
   background: #ccc;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100vh;
   user-select: none;
 }
 
-/* responsive wrapper */
-.book-wrap {
-  width: var(--page-w);
-  height: var(--page-h);
-  transform-origin: top left;
-  position: relative;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-  transition: transform 0.4s ease;
+/* Responsive container for Readymag */
+#flipbook-container {
+  width: 100%;
+  max-width: var(--spread-w);
+  aspect-ratio: var(--spread-w) / var(--page-h);
+  overflow: hidden;
 }
 
-/* flipbook container */
+/* Book wrapper keeps internal pixel-perfect sizing */
+.book-wrap {
+  width: var(--spread-w);
+  height: var(--page-h);
+  transform-origin: top left;
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+/* Flipbook container */
 .flipbook {
   width: var(--page-w);
   height: var(--page-h);
   position: relative;
   perspective: 2000px;
   transition: width 0.4s cubic-bezier(.45,.05,.55,.95), box-shadow 0.4s;
-  will-change: width, transform;
   background: #fff;
   border-radius: 4px;
   overflow: hidden;
+  will-change: width, transform;
 }
 
-/* expanded state (inner spreads) */
 .flipbook.expanded {
   width: var(--spread-w);
   box-shadow: 0 40px 80px rgba(0,0,0,0.4);
 }
 
-/* page styles */
+.spine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  background: #222;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
+/* Pages */
 .page {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  transform-style: preserve-3d;
   transform-origin: center center;
   backface-visibility: hidden;
   transition: transform 0.7s cubic-bezier(.55,.05,.35,.95), box-shadow 0.7s;
-  will-change: transform, box-shadow;
   overflow: hidden;
+  border-radius: 4px;
   background: #fff;
+  will-change: transform, box-shadow;
 }
 
 .page img {
@@ -73,64 +92,70 @@ html, body {
   display: block;
 }
 
-/* flip animation */
+/* Page flipping animation */
 .page.flipping {
   transform: rotateY(-20deg);
   box-shadow: inset -40px 0 80px rgba(0,0,0,0.3);
 }
+
 .page.flipped {
   transform: rotateY(-180deg);
   box-shadow: inset 20px 0 60px rgba(0,0,0,0.2);
 }
 
-/* black filler pages */
+/* Black filler for page 1 & 41 */
 .black-half {
   width: var(--page-w);
   height: var(--page-h);
   background: #000;
+  flex-shrink: 0;
 }
 
-/* responsive scaling */
-@media (max-width: 1200px) {
-  .book-wrap {
-    transform: scale(0.8);
-  }
+.page.flex {
+  display: flex;
 }
-@media (max-width: 900px) {
+
+/* Responsive scaling inside Readymag iframe */
+@media(max-width: 1200px) {
   .book-wrap {
-    transform: scale(0.6);
+    transform: scale(calc(100% / var(--spread-w)));
   }
 }
 </style>
 </head>
 <body>
 
-<div class="book-wrap">
-  <div class="flipbook" id="flipbook"></div>
+<div id="flipbook-container">
+  <div class="book-wrap">
+    <div class="flipbook" id="flipbook">
+      <div class="spine"></div>
+    </div>
+  </div>
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function(){
 const flipbook = document.getElementById("flipbook");
 const BASE = "https://cesarsanchezgraphics-prog.github.io/IFyouknewmyfamily/";
-const totalSpreads = 41; // Composition.jpg to Composition41.jpg
+const totalSpreads = 41;
 const pages = [];
 let currentPage = 0;
 
-// --- FRONT COVER ---
+// FRONT COVER
 const front = document.createElement("div");
 front.className = "page cover";
 front.style.zIndex = totalSpreads + 3;
-const coverImg = document.createElement("img");
-coverImg.src = BASE + "OnlineCover.jpg";
-front.appendChild(coverImg);
+front.style.transformOrigin = "left center";
+const frontImg = document.createElement("img");
+frontImg.src = BASE + "OnlineCover.jpg";
+front.appendChild(frontImg);
 flipbook.appendChild(front);
 pages.push(front);
 
-// --- PAGE 1: left half black, right = Composition.jpg ---
+// PAGE 1 (black left, right Composition.jpg)
 const p1 = document.createElement("div");
-p1.className = "page";
+p1.className = "page flex";
 p1.style.zIndex = totalSpreads + 2;
-p1.style.display = "flex";
 
 const blackLeft = document.createElement("div");
 blackLeft.className = "black-half";
@@ -138,17 +163,15 @@ p1.appendChild(blackLeft);
 
 const img1 = document.createElement("img");
 img1.src = BASE + "Composition.jpg";
-img1.style.width = "var(--page-w)";
-img1.style.height = "var(--page-h)";
 p1.appendChild(img1);
 
 flipbook.appendChild(p1);
 pages.push(p1);
 
-// --- INNER SPREADS: Composition2 .. Composition40 ---
-for (let i = 2; i <= 40; i++) {
+// INNER SPREADS (Composition2 → Composition40)
+for(let i=2;i<=40;i++){
   const spread = document.createElement("div");
-  spread.className = "page spread";
+  spread.className = "page";
   spread.style.zIndex = totalSpreads - i + 1;
 
   const img = document.createElement("img");
@@ -159,16 +182,13 @@ for (let i = 2; i <= 40; i++) {
   pages.push(spread);
 }
 
-// --- PAGE 41: right half black ---
+// PAGE 41 (left Composition41.jpg, right black)
 const p41 = document.createElement("div");
-p41.className = "page";
+p41.className = "page flex";
 p41.style.zIndex = 1;
-p41.style.display = "flex";
 
 const img41 = document.createElement("img");
 img41.src = BASE + "Composition41.jpg";
-img41.style.width = "var(--page-w)";
-img41.style.height = "var(--page-h)";
 p41.appendChild(img41);
 
 const blackRight = document.createElement("div");
@@ -178,48 +198,43 @@ p41.appendChild(blackRight);
 flipbook.appendChild(p41);
 pages.push(p41);
 
-// --- BACK COVER ---
+// BACK COVER
 const back = document.createElement("div");
 back.className = "page cover";
 back.style.zIndex = 0;
+back.style.transformOrigin = "right center";
 const backImg = document.createElement("img");
 backImg.src = BASE + "OnlineCover2.jpg";
 back.appendChild(backImg);
 flipbook.appendChild(back);
 pages.push(back);
 
-// --- FLIP LOGIC ---
-flipbook.addEventListener("click", e => {
+// FLIP LOGIC
+flipbook.addEventListener("click", e=>{
   const rect = flipbook.getBoundingClientRect();
   const x = e.clientX - rect.left;
   let page;
 
-  if (x > rect.width / 2 && currentPage < pages.length - 1) {
+  if(x > rect.width/2 && currentPage < pages.length-1){
     page = pages[currentPage];
     page.classList.add("flipping");
-
-    // expand book slightly after flip begins
-    if (currentPage === 0) setTimeout(() => flipbook.classList.add("expanded"), 150);
-
-    setTimeout(() => {
+    if(currentPage===0) setTimeout(()=>flipbook.classList.add("expanded"),150);
+    setTimeout(()=>{
       page.classList.remove("flipping");
       page.classList.add("flipped");
       currentPage++;
-    }, 150);
-
-  } else if (x < rect.width / 2 && currentPage > 0) {
+    },150);
+  }else if(x < rect.width/2 && currentPage>0){
     currentPage--;
     page = pages[currentPage];
     page.classList.add("flipping");
-
-    // shrink when returning to cover
-    if (currentPage === 0) setTimeout(() => flipbook.classList.remove("expanded"), 150);
-
-    setTimeout(() => {
+    if(currentPage===0) setTimeout(()=>flipbook.classList.remove("expanded"),150);
+    setTimeout(()=>{
       page.classList.remove("flipping");
       page.classList.remove("flipped");
-    }, 150);
+    },150);
   }
+});
 });
 </script>
 
