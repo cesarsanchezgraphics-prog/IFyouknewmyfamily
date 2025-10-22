@@ -19,16 +19,17 @@ html, body {
   width: 100%;
   background: #ccc;
   display: flex;
-  justify-content: center; /* horizontal center */
-  align-items: center;     /* vertical center */
+  justify-content: center;
+  align-items: center;
   user-select: none;
   overflow: hidden;
 }
 
-/* Responsive container */
+/* Responsive container with scaling limits */
 #flipbook-container {
   width: 100%;
-  max-width: 1024px;        /* max page width */
+  max-width: 1024px;  /* maximum container width */
+  min-width: 500px;   /* minimum container width */
   aspect-ratio: var(--spread-w)/var(--page-h);
   display: flex;
   justify-content: center;
@@ -42,6 +43,24 @@ html, body {
   transform-origin: top left;
   position: relative;
   transition: transform 0.3s ease;
+}
+
+/* Scale proportionally based on container width */
+#flipbook-container {
+  overflow: hidden;
+}
+.book-wrap {
+  transform: scale(1);
+}
+@media (max-width: 1024px) {
+  .book-wrap {
+    transform: scale(calc(min(max(100% / var(--spread-w), 0.425), 1)));
+    /* Scale is:
+       - 100%/spread-w → container-based scaling
+       - max(...,0.425) → min width ~500px
+       - min(...,1) → max width 1178px
+    */
+  }
 }
 
 /* Flipbook container */
@@ -118,13 +137,6 @@ html, body {
 
 .page.flex {
   display: flex;
-}
-
-/* Optional scaling for smaller screens */
-@media(max-width:1024px) {
-  .book-wrap {
-    transform: scale(calc(100% / var(--spread-w)));
-  }
 }
 </style>
 </head>
