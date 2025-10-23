@@ -3,36 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IF You Knew My Family Flipbook</title>
+<title>If You Knew My Family – Flipbook</title>
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- jFlip -->
-<script src="https://cdn.jsdelivr.net/gh/kayahr/jFlip/jquery.jflip.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kayahr/jFlip/jflip.css">
+<!-- Turn.js -->
+<script src="https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"></script>
 
 <style>
   html, body {
     margin: 0;
     height: 100%;
-    background: #ccc;
+    background: #bfbfbf;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
   #flipbook {
-    max-width: 1024px;
-    width: 90vw;
-    aspect-ratio: 12.28 / 9.21;
-    box-shadow: 0 0 25px rgba(0,0,0,0.25);
-    background: #000;
+    width: 1024px;
+    height: calc(1024px * 9.21 / 12.28);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
+  }
+
+  #flipbook .page {
+    background: white;
+    overflow: hidden;
   }
 
   #flipbook img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
   }
 
@@ -40,96 +43,111 @@
     background: #000;
     width: 100%;
     height: 100%;
-    display: block;
+  }
+
+  @media (max-width: 1024px) {
+    #flipbook {
+      width: 90vw;
+      height: calc(90vw * 9.21 / 12.28);
+    }
   }
 </style>
 </head>
-
 <body>
-  <div id="flipbook">
-    <!-- Front cover -->
+
+<div id="flipbook">
+  <!-- Front Cover -->
+  <div class="page">
     <img src="OnlineCover.jpg" alt="Front Cover">
-
-    <!-- Page 1 (black left, image right) -->
-    <div>
-      <div class="black-page"></div>
-      <img src="Composition1.jpg" alt="Page 1">
-    </div>
-
-    <!-- Interior spreads (Composition2–Composition40) -->
-    <img src="Composition2.jpg" alt="Page 2">
-    <img src="Composition3.jpg" alt="Page 3">
-    <img src="Composition4.jpg" alt="Page 4">
-    <img src="Composition5.jpg" alt="Page 5">
-    <img src="Composition6.jpg" alt="Page 6">
-    <img src="Composition7.jpg" alt="Page 7">
-    <img src="Composition8.jpg" alt="Page 8">
-    <img src="Composition9.jpg" alt="Page 9">
-    <img src="Composition10.jpg" alt="Page 10">
-    <img src="Composition11.jpg" alt="Page 11">
-    <img src="Composition12.jpg" alt="Page 12">
-    <img src="Composition13.jpg" alt="Page 13">
-    <img src="Composition14.jpg" alt="Page 14">
-    <img src="Composition15.jpg" alt="Page 15">
-    <img src="Composition16.jpg" alt="Page 16">
-    <img src="Composition17.jpg" alt="Page 17">
-    <img src="Composition18.jpg" alt="Page 18">
-    <img src="Composition19.jpg" alt="Page 19">
-    <img src="Composition20.jpg" alt="Page 20">
-    <img src="Composition21.jpg" alt="Page 21">
-    <img src="Composition22.jpg" alt="Page 22">
-    <img src="Composition23.jpg" alt="Page 23">
-    <img src="Composition24.jpg" alt="Page 24">
-    <img src="Composition25.jpg" alt="Page 25">
-    <img src="Composition26.jpg" alt="Page 26">
-    <img src="Composition27.jpg" alt="Page 27">
-    <img src="Composition28.jpg" alt="Page 28">
-    <img src="Composition29.jpg" alt="Page 29">
-    <img src="Composition30.jpg" alt="Page 30">
-    <img src="Composition31.jpg" alt="Page 31">
-    <img src="Composition32.jpg" alt="Page 32">
-    <img src="Composition33.jpg" alt="Page 33">
-    <img src="Composition34.jpg" alt="Page 34">
-    <img src="Composition35.jpg" alt="Page 35">
-    <img src="Composition36.jpg" alt="Page 36">
-    <img src="Composition37.jpg" alt="Page 37">
-    <img src="Composition38.jpg" alt="Page 38">
-    <img src="Composition39.jpg" alt="Page 39">
-    <img src="Composition40.jpg" alt="Page 40">
-
-    <!-- Page 41 (image left, black right) -->
-    <div>
-      <img src="Composition41.jpg" alt="Page 41">
-      <div class="black-page"></div>
-    </div>
-
-    <!-- Back cover (inside & outside) -->
-    <img src="OnlineCover2.jpg" alt="Back Cover Inside">
-    <img src="OnlineCover2.jpg" alt="Back Cover Outside">
   </div>
 
-<script>
-$(document).ready(function(){
-  const $flipbook = $('#flipbook');
-  const ratio = 12.28 / 9.21;
+  <!-- Inside Front Page (black left + image right) -->
+  <div class="page black-page"></div>
+  <div class="page">
+    <img src="Composition.jpg" alt="Composition 1">
+  </div>
 
-  function resizeFlipbook() {
+  <!-- Inner Spreads -->
+  <div class="page"><img src="Composition2.jpg" alt="Composition 2"></div>
+  <div class="page"><img src="Composition3.jpg" alt="Composition 3"></div>
+  <div class="page"><img src="Composition4.jpg" alt="Composition 4"></div>
+  <div class="page"><img src="Composition5.jpg" alt="Composition 5"></div>
+  <div class="page"><img src="Composition6.jpg" alt="Composition 6"></div>
+  <div class="page"><img src="Composition7.jpg" alt="Composition 7"></div>
+  <div class="page"><img src="Composition8.jpg" alt="Composition 8"></div>
+  <div class="page"><img src="Composition9.jpg" alt="Composition 9"></div>
+  <div class="page"><img src="Composition10.jpg" alt="Composition 10"></div>
+  <div class="page"><img src="Composition11.jpg" alt="Composition 11"></div>
+  <div class="page"><img src="Composition12.jpg" alt="Composition 12"></div>
+  <div class="page"><img src="Composition13.jpg" alt="Composition 13"></div>
+  <div class="page"><img src="Composition14.jpg" alt="Composition 14"></div>
+  <div class="page"><img src="Composition15.jpg" alt="Composition 15"></div>
+  <div class="page"><img src="Composition16.jpg" alt="Composition 16"></div>
+  <div class="page"><img src="Composition17.jpg" alt="Composition 17"></div>
+  <div class="page"><img src="Composition18.jpg" alt="Composition 18"></div>
+  <div class="page"><img src="Composition19.jpg" alt="Composition 19"></div>
+  <div class="page"><img src="Composition20.jpg" alt="Composition 20"></div>
+  <div class="page"><img src="Composition21.jpg" alt="Composition 21"></div>
+  <div class="page"><img src="Composition22.jpg" alt="Composition 22"></div>
+  <div class="page"><img src="Composition23.jpg" alt="Composition 23"></div>
+  <div class="page"><img src="Composition24.jpg" alt="Composition 24"></div>
+  <div class="page"><img src="Composition25.jpg" alt="Composition 25"></div>
+  <div class="page"><img src="Composition26.jpg" alt="Composition 26"></div>
+  <div class="page"><img src="Composition27.jpg" alt="Composition 27"></div>
+  <div class="page"><img src="Composition28.jpg" alt="Composition 28"></div>
+  <div class="page"><img src="Composition29.jpg" alt="Composition 29"></div>
+  <div class="page"><img src="Composition30.jpg" alt="Composition 30"></div>
+  <div class="page"><img src="Composition31.jpg" alt="Composition 31"></div>
+  <div class="page"><img src="Composition32.jpg" alt="Composition 32"></div>
+  <div class="page"><img src="Composition33.jpg" alt="Composition 33"></div>
+  <div class="page"><img src="Composition34.jpg" alt="Composition 34"></div>
+  <div class="page"><img src="Composition35.jpg" alt="Composition 35"></div>
+  <div class="page"><img src="Composition36.jpg" alt="Composition 36"></div>
+  <div class="page"><img src="Composition37.jpg" alt="Composition 37"></div>
+  <div class="page"><img src="Composition38.jpg" alt="Composition 38"></div>
+  <div class="page"><img src="Composition39.jpg" alt="Composition 39"></div>
+  <div class="page"><img src="Composition40.jpg" alt="Composition 40"></div>
+
+  <!-- Last Spread (image left + black right) -->
+  <div class="page"><img src="Composition41.jpg" alt="Composition 41"></div>
+  <div class="page black-page"></div>
+
+  <!-- Back Cover Inside + Outside -->
+  <div class="page"><img src="OnlineCover2.jpg" alt="Back Cover Inside"></div>
+  <div class="page"><img src="OnlineCover2.jpg" alt="Back Cover Outside"></div>
+</div>
+
+<script>
+$(function() {
+  const $flipbook = $('#flipbook');
+
+  // initialize turn.js
+  $flipbook.turn({
+    width: 1024,
+    height: 1024 * 9.21 / 12.28,
+    autoCenter: true,
+    elevation: 50,
+    duration: 1000,
+    gradients: true,
+    acceleration: true,
+    when: {
+      turning: function(event, page) {
+        console.log('Turning to page', page);
+      }
+    }
+  });
+
+  // responsive resize
+  function resizeBook() {
     const maxW = 1024;
-    const viewW = Math.min(window.innerWidth * 0.9, maxW);
-    const viewH = viewW / ratio;
-    $flipbook.css({ width: viewW + 'px', height: viewH + 'px' });
+    const screenW = window.innerWidth * 0.9;
+    const newW = Math.min(screenW, maxW);
+    const newH = newW * 9.21 / 12.28;
+    $flipbook.turn('size', newW, newH);
   }
 
-  resizeFlipbook();
-  $(window).on('resize', resizeFlipbook);
-
-  $flipbook.jFlip({
-    duration: 600,
-    background: '#ccc',
-    click: true,
-    speed: 'medium',
-    direction: 'ltr',
-  });
+  $(window).on('resize', resizeBook);
+  resizeBook();
 });
 </script>
 
