@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>If You Knew My Family – Flipbook</title>
 
-<!-- jQuery -->
+<!-- jQuery (required) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Turn.js -->
-<script src="https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"></script>
+<!-- ✅ Correct Turn.js version -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/1.1/turn.min.js"></script>
 
 <style>
   html, body {
@@ -19,12 +19,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
   }
 
   #flipbook {
     width: 1024px;
     height: calc(1024px * 9.21 / 12.28);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
   }
 
   #flipbook .page {
@@ -57,17 +58,13 @@
 
 <div id="flipbook">
   <!-- Front Cover -->
-  <div class="page">
-    <img src="OnlineCover.jpg" alt="Front Cover">
-  </div>
+  <div class="page"><img src="OnlineCover.jpg" alt="Front Cover"></div>
 
-  <!-- Inside Front Page (black left + image right) -->
+  <!-- Inside Front Page -->
   <div class="page black-page"></div>
-  <div class="page">
-    <img src="Composition.jpg" alt="Composition 1">
-  </div>
+  <div class="page"><img src="Composition.jpg" alt="Composition 1"></div>
 
-  <!-- Inner Spreads -->
+  <!-- Interior Spreads -->
   <div class="page"><img src="Composition2.jpg" alt="Composition 2"></div>
   <div class="page"><img src="Composition3.jpg" alt="Composition 3"></div>
   <div class="page"><img src="Composition4.jpg" alt="Composition 4"></div>
@@ -108,11 +105,11 @@
   <div class="page"><img src="Composition39.jpg" alt="Composition 39"></div>
   <div class="page"><img src="Composition40.jpg" alt="Composition 40"></div>
 
-  <!-- Last Spread (image left + black right) -->
+  <!-- Last Spread -->
   <div class="page"><img src="Composition41.jpg" alt="Composition 41"></div>
   <div class="page black-page"></div>
 
-  <!-- Back Cover Inside + Outside -->
+  <!-- Back Cover -->
   <div class="page"><img src="OnlineCover2.jpg" alt="Back Cover Inside"></div>
   <div class="page"><img src="OnlineCover2.jpg" alt="Back Cover Outside"></div>
 </div>
@@ -121,33 +118,27 @@
 $(function() {
   const $flipbook = $('#flipbook');
 
-  // initialize turn.js
+  // Initialize Turn.js
   $flipbook.turn({
     width: 1024,
     height: 1024 * 9.21 / 12.28,
     autoCenter: true,
-    elevation: 50,
-    duration: 1000,
+    duration: 1200,
     gradients: true,
-    acceleration: true,
-    when: {
-      turning: function(event, page) {
-        console.log('Turning to page', page);
-      }
-    }
+    elevation: 50,
   });
 
-  // responsive resize
-  function resizeBook() {
-    const maxW = 1024;
-    const screenW = window.innerWidth * 0.9;
-    const newW = Math.min(screenW, maxW);
-    const newH = newW * 9.21 / 12.28;
-    $flipbook.turn('size', newW, newH);
+  // Responsive scaling
+  function resizeFlipbook() {
+    const maxWidth = 1024;
+    const screenWidth = window.innerWidth * 0.9;
+    const newWidth = Math.min(screenWidth, maxWidth);
+    const newHeight = newWidth * 9.21 / 12.28;
+    $flipbook.turn('size', newWidth, newHeight);
   }
 
-  $(window).on('resize', resizeBook);
-  resizeBook();
+  $(window).on('resize', resizeFlipbook);
+  resizeFlipbook();
 });
 </script>
 
